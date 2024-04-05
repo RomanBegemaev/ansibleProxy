@@ -1,5 +1,7 @@
 ---
-- hosts: all
+- name: Config and install nginx and HAProxy
+  hosts: localhost
+  become: true
   tasks:
     - name: Install haproxy and nginx
       apt:
@@ -30,19 +32,19 @@
         dest: /etc/haproxy/haproxy.cfg
       notify: Restart HAProxy
 
-  - name: Creating HAProxy configuration files for domains
-    template:
-      src:baseConfProxy.j2
-      dest: "/etc/haproxy/sites-available/{{ item.domain }}"
-    with_items: "{{ domains }}"
-    become: true
+    - name: Creating HAProxy configuration files for domains
+      template:
+        src: baseConfProxy.j2
+        dest: "/etc/haproxy/sites-available/{{ item.domain }}"
+      with_items: "{{ domains }}"
+      become: true
 
-  - name: Создание символических ссылок для конфигурационных файлов Nginx и HAProxy
-    command: >
-      ln -s /etc/nginx/sites-available/{{ item.domain }} /etc/nginx/sites-enabled/{{ item.domain }} &&
-      ln -s /etc/haproxy/sites-available/{{ item.domain }} /etc/haproxy/sites-enabled/{{ item.domain }}
-    with_items: "{{ domains }}"
-    become: true
+    - name: copy Nginx and HAProxy config in enabled 
+      command: >
+        ln -s /etc/nginx/sites-available/{{ item.domain }} /etc/nginx/sites-enabled/{{ item.domain }} &&
+        ln -s /etc/haproxy/sites-available/{{ item.domain }} /etc/haproxy/sites-enabled/{{ item.domain }}
+      with_items: "{{ domains }}"
+      become: true
 
   handlers:
     - name: Restart HAProxy

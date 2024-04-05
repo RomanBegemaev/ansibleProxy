@@ -1,9 +1,10 @@
-```
-domains:
-  - domain: "example1.com"
-    ip: "192.168.1.1"
-  - domain: "example2.com"
-    ip: "192.168.1.2"
-  - domain: "example3.com"
-    ip: "192.168.1.3"
-```
+---
+all:
+  hosts:
+    example1.com:
+      ansible_host: 192.168.1.1
+    example2.com:
+      ansible_host: 192.168.1.2
+    example3.com:
+      ansible_host: 192.168.1.3
+...
