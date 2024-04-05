@@ -1,20 +1,8 @@
-events {
-    worker_connections 1024;
-}
+server {
+    listen 80;
+    server_name {{ item.domain }};
 
-http {
-    upstream backend {
-        {% for web_server in groups['web'] %}
-        server {{ hostvars[web_server]['ansible_host'] }}:80;
-        {% endfor %}
-    }
-    
-    server {
-        listen 80;
-        server_name example.com;
-
-        location / {
-            proxy_pass http://backend;
-        }
+    location / {
+        proxy_pass http://{{ item.ip }};
     }
 }

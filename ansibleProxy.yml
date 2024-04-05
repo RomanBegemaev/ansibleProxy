@@ -15,19 +15,34 @@
         dest: "/etc/bind/{{ item.domain }}.zone"
       with_items: "{{ domains }}"
       notify: Reload DNS
+
+    - name: Configure DNS records for HAProxy server
+      template:
+        src: dns_record.j2
+        dest: "/etc/bind/{{ item.domain }}.zone"
+      with_items: "{{ domains }}"
+      when: "'example1.com' in item.domain"
+      notify: Reload DNS
     
     - name: Configure HAProxy
-      template:
+      template: 
         src: baseConfProxy.cfg.j2
         dest: /etc/haproxy/haproxy.cfg
       notify: Restart HAProxy
 
-    - name: Configure Nginx
-      template:
-        src: nginx.conf.j2
-        dest: /etc/nginx/nginx.conf
-      notify: Restart Nginx
+  - name: Creating HAProxy configuration files for domains
+    template:
+      src:baseConfProxy.j2
+      dest: "/etc/haproxy/sites-available/{{ item.domain }}"
+    with_items: "{{ domains }}"
+    become: true
 
+  - name: Создание символических ссылок для конфигурационных файлов Nginx и HAProxy
+    command: >
+      ln -s /etc/nginx/sites-available/{{ item.domain }} /etc/nginx/sites-enabled/{{ item.domain }} &&
+      ln -s /etc/haproxy/sites-available/{{ item.domain }} /etc/haproxy/sites-enabled/{{ item.domain }}
+    with_items: "{{ domains }}"
+    become: true
 
   handlers:
     - name: Restart HAProxy

@@ -1,24 +1,7 @@
-global
-    log /dev/log local0
-    log /dev/log local1 notice
-    chroot /var/lib/haproxy
-    user haproxy
-    group haproxy
-
-defaults
-    mode http
-    log global
-    option httplog
-    timeout connect 5000ms
-    timeout client 50000ms
-    timeout server 50000ms
-
 frontend http_front
     bind *:80
     default_backend http_back
 
 backend http_back
     balance roundrobin
-    {% for web_server in groups['web'] %}
-    server {{ web_server }} {{ hostvars[web_server]['ansible_host'] }}:80 check
-    {% endfor %}
+    server server1 {{ item.ip }}:80 check
